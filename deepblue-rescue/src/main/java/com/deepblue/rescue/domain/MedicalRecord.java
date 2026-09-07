@@ -72,3 +72,4 @@ public class MedicalRecord {
         this.animal = animal;
     }
 
+}
