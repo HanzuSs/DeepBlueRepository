@@ -23,7 +23,7 @@ public class Treatment {
     private LocalDateTime performedAt;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = false, length = 50)
     private TreatmentType type;
 
     @Column(columnDefinition = "TEXT")

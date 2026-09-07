@@ -42,7 +42,7 @@ public class Animal {
     private AnimalSex sex;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "rescue_case_id", unique = true)
+    @JoinColumn(name = "rescue_case_id", nullable = false, unique = true)
     private RescueCase rescueCase;
 
     @OneToOne(

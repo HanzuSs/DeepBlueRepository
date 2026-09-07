@@ -14,7 +14,7 @@ public class MedicalRecord {
     @Column(name = "initial_weight")
     private BigDecimal initialWeight;
 
-    @Column(name = "initial_condition")
+    @Column(name = "initial_condition", length = 100)
     private String initialCondition;
 
     @Column(columnDefinition = "TEXT")
@@ -71,4 +71,5 @@ public class MedicalRecord {
     void setAnimal(Animal animal) {
         this.animal = animal;
     }
+    
 }
