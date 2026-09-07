@@ -34,6 +34,9 @@ public class Animal {
     @Column(name = "scientific_name", length = 150)
     private String scientificName;
 
+    @Column(name = "tracking_device_code", length = 50, unique = true)
+    private String trackingDeviceCode;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "sex", nullable = false, length = 20)
     private AnimalSex sex;
@@ -70,12 +73,6 @@ public class Animal {
             medicalRecord.setAnimal(this);
         }
     }
-    @OneToMany(mappedBy = "animal")
-    private List<Treatment> treatments = new ArrayList<>();
-
-    public List<Treatment> getTreatments() {
-        return treatments;
-    }
 
     public Long getId() {
         return id;
@@ -103,6 +100,14 @@ public class Animal {
 
     public void setScientificName(String scientificName) {
         this.scientificName = scientificName;
+    }
+
+    public String getTrackingDeviceCode() {
+        return trackingDeviceCode;
+    }
+
+    public void setTrackingDeviceCode(String trackingDeviceCode) {
+        this.trackingDeviceCode = trackingDeviceCode;
     }
 
     public AnimalSex getSex() {
