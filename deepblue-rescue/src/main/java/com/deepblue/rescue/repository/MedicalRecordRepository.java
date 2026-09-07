@@ -1,7 +1,7 @@
 package com.deepblue.rescue.repository;
 
+import com.deepblue.rescue.domain.MedicalRecord;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-// TODO: definir <Entidad, TipoId> según el modelado (Parte II)
-public interface MedicalRecordRepository extends JpaRepository<Object, Long> {
+public interface MedicalRecordRepository extends JpaRepository<MedicalRecord, Long> {
 }
