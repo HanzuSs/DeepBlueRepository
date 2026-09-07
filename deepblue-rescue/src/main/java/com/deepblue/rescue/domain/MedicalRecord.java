@@ -1,5 +1,15 @@
 package com.deepblue.rescue.domain;
 
-// TODO: definir según el modelado (Parte II)
+// TODO: completar según el modelado (Paso siguiente: Implementar MedicalRecord)
 public class MedicalRecord {
+
+    private Animal animal;
+
+    public void setAnimal(Animal animal) {
+        this.animal = animal;
+    }
+
+    public Animal getAnimal() {
+        return animal;
+    }
 }
