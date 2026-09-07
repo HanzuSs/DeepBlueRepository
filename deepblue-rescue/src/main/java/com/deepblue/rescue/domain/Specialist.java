@@ -55,6 +55,13 @@ public class Specialist {
         expertise.getSpecialists().add(this);
     }
 
+    @OneToMany(mappedBy = "specialist")
+    private List<Treatment> treatments = new ArrayList<>();
+
+    public List<Treatment> getTreatments() {
+        return treatments;
+    }
+
     public Long getId() {
         return id;
     }
