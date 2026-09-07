@@ -71,5 +71,5 @@ public class MedicalRecord {
     void setAnimal(Animal animal) {
         this.animal = animal;
     }
-
+    
 }
