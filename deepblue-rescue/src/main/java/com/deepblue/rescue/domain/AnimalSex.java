@@ -1,5 +1,7 @@
 package com.deepblue.rescue.domain;
 
-// TODO: definir según el modelado (Parte II)
-public class AnimalSex {
+public enum AnimalSex {
+    MALE,
+    FEMALE,
+    UNKNOWN
 }
