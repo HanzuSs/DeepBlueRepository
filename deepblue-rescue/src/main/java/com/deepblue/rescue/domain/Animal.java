@@ -70,6 +70,12 @@ public class Animal {
             medicalRecord.setAnimal(this);
         }
     }
+    @OneToMany(mappedBy = "animal")
+    private List<Treatment> treatments = new ArrayList<>();
+
+    public List<Treatment> getTreatments() {
+        return treatments;
+    }
 
     public Long getId() {
         return id;
