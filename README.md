@@ -1,5 +1,8 @@
     # DeepBlue Rescue
 
+    # Estudiantes : Hanzu Vives 2024214064; Samuel Almanza 2024214061
+
+
     ## Descripcion
 
     DeepBlue Rescue es una capa de persistencia para una plataforma de rescate y rehabilitacion de fauna marina. Utiliza Java 21, Spring Boot 4, Spring Data JPA, Hibernate, PostgreSQL, Flyway y Testcontainers.
@@ -123,3 +126,47 @@
     - Animales en un estado de rescate que recibieron tratamientos de especialistas con una expertise determinada, usando `DISTINCT`.
 
     Todas las consultas personalizadas utilizan JPQL; no se usa SQL nativo en los repositories.
+
+
+    ## Respuestas a las preguntas
+    -1. 
+ * JPA: Especificación (interfaz estándar) de Java para persistencia.
+ * Hibernate: Proveedor/implementación concreta que ejecuta JPA.
+ * Spring Data JPA: Capa de abstracción de Spring que simplifica el uso de repositorios JPA.
+ * PostgreSQL: Sistema de gestión de bases de datos relacional físico.
+2. ¿Qué componente crea las tablas?
+El motor de base de datos (PostgreSQL), ejecutado mediante esquemas generados por Hibernate o scripts de migración.
+3. ¿Qué componente ejecuta las migraciones?
+Herramientas especializadas como Flyway o Liquibase.
+4. ¿Qué hace ddl-auto=validate?
+Comprueba que el esquema actual de la base de datos coincida con las entidades de Java, lanzando un error al iniciar si hay diferencias (no modifica la BD).
+5. ¿Qué significa mappedBy?
+Indica el atributo de la entidad inversa que posee la relación, señalando que el lado actual es el inverso (no propietario) y no crea la FK.
+6. ¿Cómo identificas al propietario de una relación?
+Es el lado que no tiene el atributo mappedBy (en relaciones @OneToMany/@ManyToOne, siempre es el lado @ManyToOne).
+7. ¿Dónde está físicamente la FK de RescueCenter 1:N RescueCase?
+En la tabla de la entidad del lado "N" (RescueCase).
+8. ¿Qué permite que Animal 1:1 MedicalRecord sea realmente 1:1 en PostgreSQL?
+Una restricción de unicidad (UNIQUE) en la columna de la llave foránea de la tabla dependiente.
+9. ¿Por qué Specialist N:M Expertise requiere una tabla intermedia?
+Porque las bases de datos relacionales no pueden almacenar múltiples valores en una sola columna; la tabla intermedia mapea las combinaciones de ambas entidades.
+10. Diferencia entre findById() y findByCaseCode()
+ * findById(): Busca por la llave primaria (@Id) de la entidad.
+ * findByCaseCode(): Es un Query Method dinámico que busca por un atributo de negocio (caseCode).
+11. ¿Qué es un Query Method?
+Un método declarado en un repositorio cuya nomenclatura es interpretada automáticamente por Spring Data JPA para construir la consulta.
+12. ¿Qué significa navegar asociaciones mediante findByRescueCaseRescueCaseCode(...)?
+Permite hacer consultas cruzadas (joins implícitos) atravesando propiedades anidadas de entidades relacionadas.
+13. ¿Qué es @Query?
+Una anotación para definir consultas personalizadas (en JPQL o SQL nativo) de forma explícita en un repositorio.
+14. ¿Qué es JPQL?
+Java Persistence Query Language; un lenguaje de consultas orientado a objetos que opera sobre las entidades de Java en lugar de las tablas de la base de datos.
+15. ¿Por qué JPQL utiliza Specialist en vez de specialists?
+Porque JPQL trabaja con los nombres de las clases de entidad en Java, no con los nombres físicos de las tablas de la base de datos.
+16. Diferencia entre save() y saveAndFlush()
+ * save(): Guarda la entidad en el contexto de persistencia (sincroniza al final de la transacción).
+ * saveAndFlush(): Fuerza la escritura y ejecución inmediata del SQL en la base de datos en ese preciso instante.
+17. ¿Por qué probamos constraints con PostgreSQL y no con Java?
+Porque PostgreSQL valida reglas a nivel de motor real (como integridad referencial y restricciones a nivel de BD) que una simulación en memoria no garantiza al 100%.
+18. ¿Por qué Testcontainers es útil?
+Porque permite levantar servicios reales (como una base de datos PostgreSQL en Docker) durante las pruebas automatizadas, asegurando un entorno idéntico al de producción.
