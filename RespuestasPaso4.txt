@@ -1,0 +1,20 @@
+1. FK entre RescueCenter y RescueCase
+En RescueCase. Es una relación 1:N (un centro tiene muchos casos), y en un modelo relacional la FK siempre va del lado "N" (el lado "muchos") hacia el lado "1". Entonces rescue_case tiene una columna rescue_center_id.
+
+2. FK entre Animal y MedicalRecord
+Aquí es donde hay que pensar un poco más porque es 1:1. Lo más natural semánticamente es que la FK esté en MedicalRecord (columna animal_id), porque el registro médico "pertenece" a un animal — el animal es el dueño conceptual de la relación, el historial médico es el dependiente. Animal no necesita saber el id de su MedicalRecord; es MedicalRecord el que apunta hacia atrás.
+
+3. Constraint para que sea una verdadera relación 1:1
+Una FK sola solo garantiza N:1 (varios MedicalRecord podrían apuntar al mismo animal). Para forzar 1:1 necesitas un UNIQUE constraint sobre la columna animal_id en medical_record (además de la FK). Eso impide que dos registros médicos apunten al mismo animal.
+
+4. Por qué Specialist y Expertise necesitan tabla intermedia
+Porque es N:M — un especialista puede tener varias expertises, y una expertise puede pertenecer a varios especialistas. Una tabla normal no puede modelar N:M directamente (no hay un solo lado donde poner la FK), así que se necesita una tabla puente (ej. specialist_expertise) con dos FKs: specialist_id y expertise_id, normalmente con una clave primaria compuesta por ambas (o un UNIQUE(specialist_id, expertise_id)).
+
+5. Dónde van las FKs de Treatment
+Treatment es el lado "N" en dos relaciones 1:N distintas (Animal 1─N Treatment y Specialist 1─N Treatment), así que ambas FKs van en treatment: columnas animal_id y specialist_id.
+
+6. ¿Puede un tratamiento existir sin Animal?
+No debería — un tratamiento sin animal no tiene sentido de negocio (¿tratamiento de quién?). Por eso animal_id en treatment debería ser NOT NULL.
+
+7. ¿Puede existir sin Specialist?
+Depende de las reglas del negocio, pero normalmente sí podría ser opcional: hay clínicas donde un tratamiento se registra antes de asignar al especialista, o se hace de forma autónoma/protocolizada. Si tu enunciado no dice explícitamente que todo tratamiento requiere especialista asignado, lo razonable es dejar specialist_id como NULL-able. Si el profe indica que siempre debe haber un especialista responsable, entonces sería NOT NULL también.

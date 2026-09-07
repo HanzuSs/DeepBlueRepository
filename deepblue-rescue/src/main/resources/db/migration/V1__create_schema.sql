@@ -89,7 +89,7 @@ CREATE TABLE specialist_expertise (
 CREATE TABLE treatments (
     id             BIGSERIAL PRIMARY KEY,
     animal_id      BIGINT       NOT NULL,
-    specialist_id  BIGINT,
+    specialist_id  BIGINT       NOT NULL,
     performed_at   TIMESTAMP    NOT NULL,
     type           VARCHAR(50)  NOT NULL,
     description    TEXT,
@@ -98,3 +98,14 @@ CREATE TABLE treatments (
     CONSTRAINT fk_treatment_specialist
         FOREIGN KEY (specialist_id) REFERENCES specialists (id)
 );
+
+-- ============================================================
+-- Índices
+-- ============================================================
+CREATE INDEX idx_rescue_case_center ON rescue_cases (rescue_center_id);
+CREATE INDEX idx_rescue_case_status ON rescue_cases (status);
+CREATE INDEX idx_rescue_case_date ON rescue_cases (rescue_date);
+
+CREATE INDEX idx_treatment_animal ON treatments (animal_id);
+CREATE INDEX idx_treatment_specialist ON treatments (specialist_id);
+CREATE INDEX idx_treatment_performed_at ON treatments (performed_at);
