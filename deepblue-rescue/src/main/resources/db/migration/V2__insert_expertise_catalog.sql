@@ -3,5 +3,5 @@ INSERT INTO expertise (name) VALUES
     ('Marine Mammals'),
     ('Marine Birds'),
     ('Trauma'),
-    ('Rehabilitation'),
+    ('Rehabilitation');
 
