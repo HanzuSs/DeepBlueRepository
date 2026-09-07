@@ -19,11 +19,14 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.springframework.dao.DataIntegrityViolationException;
 
 @Testcontainers
 @SpringBootTest
@@ -64,18 +67,18 @@ class PersistenceIntegrationTest {
         }
 
         @Test
-        void flywayExecutesInitialMigrations() {
+        void flywayExecutesMigrations() {
         List<String> appliedVersions = jdbcTemplate.query(
             """
             select version
             from flyway_schema_history
-            where version in ('1', '2')
+            where version in ('1', '2', '3')
             order by installed_rank
             """,
             (resultSet, rowNumber) -> resultSet.getString("version")
         );
 
-        assertEquals(List.of("1", "2"), appliedVersions);
+        assertEquals(List.of("1", "2", "3"), appliedVersions);
         }
 
         @Test
@@ -168,6 +171,34 @@ class PersistenceIntegrationTest {
         assertNotNull(medicalRecord.getId());
         assertEquals(animal, medicalRecord.getAnimal());
         assertEquals(medicalRecord, animal.getMedicalRecord());
+        }
+
+        @Test
+        void trackingDeviceCodeIsOptionalAndUnique() {
+        RescueCenter center = new RescueCenter("DB-GPS", "GPS Center", "Santa Marta");
+        RescueCase firstCase = new RescueCase("RES-GPS-1", LocalDate.now(), "Bahia Concha", RescueStatus.ADMITTED);
+        RescueCase secondCase = new RescueCase("RES-GPS-2", LocalDate.now(), "Taganga", RescueStatus.ADMITTED);
+        RescueCase thirdCase = new RescueCase("RES-GPS-3", LocalDate.now(), "Rodadero", RescueStatus.ADMITTED);
+        center.addCase(firstCase);
+        center.addCase(secondCase);
+        center.addCase(thirdCase);
+        rescueCenterRepository.saveAndFlush(center);
+
+        Animal withoutDevice = new Animal("AN-GPS-1", "Turtle", "Chelonia mydas", AnimalSex.UNKNOWN);
+        withoutDevice.setRescueCase(firstCase);
+        animalRepository.saveAndFlush(withoutDevice);
+
+        Animal withDevice = new Animal("AN-GPS-2", "Seal", "Zalophus wollebaeki", AnimalSex.UNKNOWN);
+        withDevice.setRescueCase(secondCase);
+        withDevice.setTrackingDeviceCode("GPS-001");
+        animalRepository.saveAndFlush(withDevice);
+
+        Animal duplicateDevice = new Animal("AN-GPS-3", "Bird", "Sula nebouxii", AnimalSex.UNKNOWN);
+        duplicateDevice.setRescueCase(thirdCase);
+        duplicateDevice.setTrackingDeviceCode("GPS-001");
+
+        assertThrows(DataIntegrityViolationException.class,
+            () -> animalRepository.saveAndFlush(duplicateDevice));
         }
 
         @Test
@@ -294,6 +325,215 @@ class PersistenceIntegrationTest {
 
         assertEquals(2, specialists.size());
         assertTrue(specialists.stream().map(Specialist::getFirstName).toList().containsAll(List.of("Elena", "Sofia")));
+        }
+
+        @Test
+        void persistsAndQueriesIntegratedRescueScenario() {
+        RescueCenter center = new RescueCenter("DB-CAR", "DeepBlue Caribbean", "Santa Marta");
+        RescueCase rescueCase = new RescueCase(
+            "RES-2026-100",
+            LocalDate.of(2026, 8, 18),
+            "Bahia Concha",
+            RescueStatus.IN_REHABILITATION
+        );
+        Animal animal = new Animal(
+            "AN-2026-100",
+            "Green Sea Turtle",
+            "Chelonia mydas",
+            AnimalSex.FEMALE
+        );
+        animal.setTrackingDeviceCode("GPS-2026-100");
+        animal.assignMedicalRecord(new MedicalRecord(
+            new BigDecimal("27.80"),
+            "STABLE",
+            "Injury caused by fishing net",
+            "Possible plastic ingestion"
+        ));
+        center.addCase(rescueCase);
+        rescueCase.assignAnimal(animal);
+        rescueCenterRepository.saveAndFlush(center);
+
+        Expertise marineReptiles = expertiseRepository.findByNameIgnoreCase("Marine Reptiles").orElseThrow();
+        Expertise trauma = expertiseRepository.findByNameIgnoreCase("Trauma").orElseThrow();
+        Expertise rehabilitation = expertiseRepository.findByNameIgnoreCase("Rehabilitation").orElseThrow();
+        Specialist elena = new Specialist(
+            "SPEC-001",
+            "Elena",
+            "Vargas",
+            "elena@deepblue.org",
+            true
+        );
+        elena.addExpertise(marineReptiles);
+        elena.addExpertise(trauma);
+        elena.addExpertise(rehabilitation);
+        specialistRepository.saveAndFlush(elena);
+
+        treatmentRepository.saveAll(List.of(
+            new Treatment(
+                animal,
+                elena,
+                LocalDateTime.of(2026, 8, 18, 10, 0),
+                TreatmentType.WOUND_CARE,
+                "Cleaning of left front flipper"
+            ),
+            new Treatment(
+                animal,
+                elena,
+                LocalDateTime.of(2026, 8, 19, 10, 0),
+                TreatmentType.HYDRATION,
+                "Subcutaneous fluid therapy"
+            )
+        ));
+        treatmentRepository.flush();
+
+        assertEquals(animal, rescueCaseRepository.findByCaseCode("RES-2026-100").orElseThrow().getAnimal());
+        assertEquals(1, rescueCaseRepository.findByStatusOrderByRescueDateAsc(
+            RescueStatus.IN_REHABILITATION
+        ).size());
+        assertEquals(1, animalRepository.findByRescueCaseRescueCenterCode("DB-CAR").size());
+        assertEquals(1, animalRepository.findByCommonNameContainingIgnoreCase("turtle").size());
+        assertEquals(1, specialistRepository.findActiveByExpertise("Trauma").size());
+        assertEquals(2, treatmentRepository.findByAnimalIdOrderByPerformedAtAsc(animal.getId()).size());
+        assertEquals(2, treatmentRepository.findBySpecialistExpertise("Rehabilitation").size());
+        assertEquals(List.of(animal), animalRepository.findInStatusTreatedByExpertise(
+            RescueStatus.IN_REHABILITATION,
+            "trauma"
+        ));
+        assertEquals(1, treatmentRepository.findPerformedBetween(
+            LocalDateTime.of(2026, 8, 18, 0, 0),
+            LocalDateTime.of(2026, 8, 18, 23, 59)
+        ).size());
+        }
+
+        @Test
+        void findsAnimalTreatmentsInChronologicalOrder() {
+        TreatmentScenario scenario = persistTreatmentScenario();
+
+        List<Treatment> treatments = treatmentRepository.findByAnimalIdOrderByPerformedAtAsc(
+            scenario.animal().getId()
+        );
+
+        assertEquals(3, treatments.size());
+        assertEquals(TreatmentType.WOUND_CARE, treatments.get(0).getType());
+        assertEquals(TreatmentType.HYDRATION, treatments.get(1).getType());
+        assertEquals(TreatmentType.OBSERVATION, treatments.get(2).getType());
+        }
+
+        @Test
+        void findsTreatmentsWithinDateInterval() {
+        Animal animal = persistAnimalForTreatment("AN-INTERVAL");
+        Specialist specialist = specialistRepository.saveAndFlush(
+            new Specialist("SPEC-INTERVAL", "Elena", "Vargas", "interval@deepblue.org", true)
+        );
+        treatmentRepository.saveAll(List.of(
+            new Treatment(animal, specialist, LocalDateTime.of(2026, 8, 1, 10, 0), TreatmentType.WOUND_CARE, "Before"),
+            new Treatment(animal, specialist, LocalDateTime.of(2026, 8, 10, 10, 0), TreatmentType.HYDRATION, "Inside"),
+            new Treatment(animal, specialist, LocalDateTime.of(2026, 8, 20, 10, 0), TreatmentType.OBSERVATION, "After")
+        ));
+        treatmentRepository.flush();
+
+        List<Treatment> treatments = treatmentRepository.findPerformedBetween(
+            LocalDateTime.of(2026, 8, 5, 0, 0),
+            LocalDateTime.of(2026, 8, 15, 23, 59)
+        );
+
+        assertEquals(1, treatments.size());
+        assertEquals(LocalDateTime.of(2026, 8, 10, 10, 0), treatments.get(0).getPerformedAt());
+        }
+
+        @Test
+        void rejectsDuplicateAnimalCode() {
+        RescueCenter center = new RescueCenter("DB-UNIQUE", "Unique Center", "Santa Marta");
+        RescueCase firstCase = new RescueCase("RES-UNIQUE-1", LocalDate.now(), "Bahia Concha", RescueStatus.ADMITTED);
+        RescueCase secondCase = new RescueCase("RES-UNIQUE-2", LocalDate.now(), "Taganga", RescueStatus.ADMITTED);
+        center.addCase(firstCase);
+        center.addCase(secondCase);
+        rescueCenterRepository.saveAndFlush(center);
+
+        Animal firstAnimal = new Animal("AN-100", "Turtle", "Chelonia mydas", AnimalSex.UNKNOWN);
+        firstAnimal.setRescueCase(firstCase);
+        animalRepository.saveAndFlush(firstAnimal);
+        Animal duplicate = new Animal("AN-100", "Seal", "Zalophus wollebaeki", AnimalSex.UNKNOWN);
+        duplicate.setRescueCase(secondCase);
+
+        assertThrows(DataIntegrityViolationException.class, () -> animalRepository.saveAndFlush(duplicate));
+        }
+
+        @Test
+        void rejectsInvalidRescueStatusCheckConstraint() {
+        RescueCenter center = rescueCenterRepository.saveAndFlush(
+            new RescueCenter("DB-CHECK", "Check Center", "Santa Marta")
+        );
+
+        assertThrows(DataIntegrityViolationException.class, () -> jdbcTemplate.update(
+            """
+            insert into rescue_cases
+                (case_code, rescue_date, rescue_location, status, rescue_center_id)
+            values (?, ?, ?, ?, ?)
+            """,
+            "RES-CHECK",
+            LocalDate.of(2026, 8, 1),
+            "Bahia Concha",
+            "INVALID_STATUS",
+            center.getId()
+        ));
+        }
+
+        @Test
+        void rejectsTreatmentWithUnknownForeignKeys() {
+        assertThrows(DataIntegrityViolationException.class, () -> jdbcTemplate.update(
+            """
+            insert into treatments
+                (animal_id, specialist_id, performed_at, type, description)
+            values (?, ?, ?, ?, ?)
+            """,
+            999_999L,
+            999_999L,
+            LocalDateTime.of(2026, 8, 1, 10, 0),
+            "WOUND_CARE",
+            "Invalid foreign keys"
+        ));
+        }
+
+        private TreatmentScenario persistTreatmentScenario() {
+        Animal animal = persistAnimalForTreatment("AN-TREATMENT");
+        Specialist elena = specialistRepository.saveAndFlush(
+            new Specialist("SPEC-ELENA", "Elena", "Vargas", "elena.treatment@deepblue.org", true)
+        );
+        Specialist mateo = specialistRepository.saveAndFlush(
+            new Specialist("SPEC-MATEO", "Mateo", "Rojas", "mateo.treatment@deepblue.org", true)
+        );
+
+        treatmentRepository.saveAll(List.of(
+            new Treatment(animal, elena, LocalDateTime.of(2026, 8, 1, 10, 0), TreatmentType.WOUND_CARE, "Cleaning"),
+            new Treatment(animal, elena, LocalDateTime.of(2026, 8, 10, 10, 0), TreatmentType.HYDRATION, "Fluid therapy"),
+            new Treatment(animal, mateo, LocalDateTime.of(2026, 8, 20, 10, 0), TreatmentType.OBSERVATION, "Observation")
+        ));
+        treatmentRepository.flush();
+
+        return new TreatmentScenario(animal, elena, mateo);
+        }
+
+        private Animal persistAnimalForTreatment(String animalCode) {
+        RescueCenter center = new RescueCenter(
+            "DB-" + animalCode,
+            "Treatment Center",
+            "Santa Marta"
+        );
+        RescueCase rescueCase = new RescueCase(
+            "RES-" + animalCode,
+            LocalDate.of(2026, 7, 1),
+            "Bahia Concha",
+            RescueStatus.IN_REHABILITATION
+        );
+        Animal animal = new Animal(animalCode, "Green Sea Turtle", "Chelonia mydas", AnimalSex.UNKNOWN);
+        center.addCase(rescueCase);
+        rescueCase.assignAnimal(animal);
+        rescueCenterRepository.saveAndFlush(center);
+        return animal;
+        }
+
+        private record TreatmentScenario(Animal animal, Specialist elena, Specialist mateo) {
         }
 
 }
