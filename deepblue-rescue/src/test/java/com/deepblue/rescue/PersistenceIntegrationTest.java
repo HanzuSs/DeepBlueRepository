@@ -1,5 +1,6 @@
 package com.deepblue.rescue;
 
+import com.deepblue.rescue.domain.*;
 import com.deepblue.rescue.repository.AnimalRepository;
 import com.deepblue.rescue.repository.ExpertiseRepository;
 import com.deepblue.rescue.repository.MedicalRecordRepository;
@@ -35,7 +36,7 @@ class PersistenceIntegrationTest {
 
     @Container
     @ServiceConnection
-    static final PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:18-alpine")
+    static final PostgreSQLContainer postgres = new PostgreSQLContainer("postgres:18-alpine")
             .withDatabaseName("deepblue_test")
             .withUsername("deepblue")
             .withPassword("deepblue");
