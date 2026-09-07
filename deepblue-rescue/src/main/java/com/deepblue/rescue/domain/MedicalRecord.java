@@ -72,8 +72,3 @@ public class MedicalRecord {
         this.animal = animal;
     }
 }
-
-    public Animal getAnimal() {
-        return animal;
-    }
-}

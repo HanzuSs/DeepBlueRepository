@@ -1,7 +1,10 @@
 package com.deepblue.rescue.domain;
 
 import jakarta.persistence.*;
+
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -34,6 +37,9 @@ public class Specialist {
             inverseJoinColumns = @JoinColumn(name = "expertise_id")
     )
     private Set<Expertise> expertiseAreas = new HashSet<>();
+
+    @OneToMany(mappedBy = "specialist")
+    private List<Treatment> treatments = new ArrayList<>();
 
     protected Specialist() {
     }
@@ -81,5 +87,9 @@ public class Specialist {
 
     public Set<Expertise> getExpertiseAreas() {
         return expertiseAreas;
+    }
+
+    public List<Treatment> getTreatments() {
+        return treatments;
     }
 }

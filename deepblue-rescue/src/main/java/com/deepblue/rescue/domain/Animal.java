@@ -13,6 +13,9 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Table(name = "animals")
 public class Animal {
@@ -46,6 +49,9 @@ public class Animal {
             fetch = FetchType.LAZY
     )
     private MedicalRecord medicalRecord;
+
+    @OneToMany(mappedBy = "animal")
+    private List<Treatment> treatments = new ArrayList<>();
 
     protected Animal() {
         // requerido por JPA
@@ -111,5 +117,9 @@ public class Animal {
 
     public MedicalRecord getMedicalRecord() {
         return medicalRecord;
+    }
+
+    public List<Treatment> getTreatments() {
+        return treatments;
     }
 }
