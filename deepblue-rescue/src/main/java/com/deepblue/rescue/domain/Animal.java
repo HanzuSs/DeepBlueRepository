@@ -12,7 +12,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
-
+import jakarta.persistence.OneToMany;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -42,7 +42,7 @@ public class Animal {
     private AnimalSex sex;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "rescue_case_id", unique = true)
+    @JoinColumn(name = "rescue_case_id", nullable = false, unique = true)
     private RescueCase rescueCase;
 
     @OneToOne(
