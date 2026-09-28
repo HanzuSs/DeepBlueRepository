@@ -1,3 +1,0 @@
-¿Por qué no necesitamos crear manualmente otro índice para las PK?":
-
-Porque toda PRIMARY KEY en PostgreSQL crea automáticamente un índice único sobre esa(s) columna(s) (internamente, un B-tree) para poder garantizar la restricción de unicidad de forma eficiente. Crear otro índice manual sobre la PK sería redundante — duplicaría trabajo y espacio en disco sin ninguna ganancia de performance.
