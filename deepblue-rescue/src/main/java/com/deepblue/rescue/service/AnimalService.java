@@ -6,9 +6,9 @@ import java.util.List;
 
 public interface AnimalService {
 
-    AnimalResponse findByCode(String animalCode);
+    AnimalResponse findByCode(Long animalId);
 
     List<AnimalResponse> findAnimalsInRehabilitation();
 
-    boolean canReceiveTreatment(String animalCode);
+    boolean canReceiveTreatment(Long animalId);
 }
