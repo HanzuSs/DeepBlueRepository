@@ -160,6 +160,17 @@ class PersistenceIntegrationTest {
             "Chelonia mydas",
             AnimalSex.UNKNOWN
         );
+        RescueCenter center = new RescueCenter("DB-MED", "Medical Center", "Santa Marta");
+        RescueCase rescueCase = new RescueCase(
+            "RES-MED-1",
+            LocalDate.now(),
+            "Bahia Concha",
+            RescueStatus.ADMITTED
+        );
+        center.addCase(rescueCase);
+        rescueCenterRepository.saveAndFlush(center);
+        rescueCase.assignAnimal(animal);
+
         MedicalRecord medicalRecord = new MedicalRecord(
             new BigDecimal("28.40"),
             "STABLE",

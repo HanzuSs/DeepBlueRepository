@@ -130,10 +130,10 @@
 
     ## Respuestas a las preguntas
     -1. 
- * JPA: Especificación (interfaz estándar) de Java para persistencia.
- * Hibernate: Proveedor/implementación concreta que ejecuta JPA.
- * Spring Data JPA: Capa de abstracción de Spring que simplifica el uso de repositorios JPA.
- * PostgreSQL: Sistema de gestión de bases de datos relacional físico.
+ JPA: Especificación (interfaz estándar) de Java para persistencia.
+ Hibernate: Proveedor/implementación concreta que ejecuta JPA.
+ Spring Data JPA: Capa de abstracción de Spring que simplifica el uso de repositorios JPA.
+ PostgreSQL: Sistema de gestión de bases de datos relacional físico.
 2. ¿Qué componente crea las tablas?
 El motor de base de datos (PostgreSQL), ejecutado mediante esquemas generados por Hibernate o scripts de migración.
 3. ¿Qué componente ejecuta las migraciones?
@@ -151,8 +151,8 @@ Una restricción de unicidad (UNIQUE) en la columna de la llave foránea de la t
 9. ¿Por qué Specialist N:M Expertise requiere una tabla intermedia?
 Porque las bases de datos relacionales no pueden almacenar múltiples valores en una sola columna; la tabla intermedia mapea las combinaciones de ambas entidades.
 10. Diferencia entre findById() y findByCaseCode()
- * findById(): Busca por la llave primaria (@Id) de la entidad.
- * findByCaseCode(): Es un Query Method dinámico que busca por un atributo de negocio (caseCode).
+  findById(): Busca por la llave primaria (@Id) de la entidad.
+  findByCaseCode(): Es un Query Method dinámico que busca por un atributo de negocio (caseCode).
 11. ¿Qué es un Query Method?
 Un método declarado en un repositorio cuya nomenclatura es interpretada automáticamente por Spring Data JPA para construir la consulta.
 12. ¿Qué significa navegar asociaciones mediante findByRescueCaseRescueCaseCode(...)?
@@ -164,8 +164,8 @@ Java Persistence Query Language; un lenguaje de consultas orientado a objetos qu
 15. ¿Por qué JPQL utiliza Specialist en vez de specialists?
 Porque JPQL trabaja con los nombres de las clases de entidad en Java, no con los nombres físicos de las tablas de la base de datos.
 16. Diferencia entre save() y saveAndFlush()
- * save(): Guarda la entidad en el contexto de persistencia (sincroniza al final de la transacción).
- * saveAndFlush(): Fuerza la escritura y ejecución inmediata del SQL en la base de datos en ese preciso instante.
+  save(): Guarda la entidad en el contexto de persistencia (sincroniza al final de la transacción).
+  saveAndFlush(): Fuerza la escritura y ejecución inmediata del SQL en la base de datos en ese preciso instante.
 17. ¿Por qué probamos constraints con PostgreSQL y no con Java?
 Porque PostgreSQL valida reglas a nivel de motor real (como integridad referencial y restricciones a nivel de BD) que una simulación en memoria no garantiza al 100%.
 18. ¿Por qué Testcontainers es útil?
