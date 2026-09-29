@@ -1,0 +1,11 @@
+.git
+.idea
+.vscode
+.mvn
+target
+build
+out
+*.iml
+*.log
+Dockerfile*
+docker-compose*

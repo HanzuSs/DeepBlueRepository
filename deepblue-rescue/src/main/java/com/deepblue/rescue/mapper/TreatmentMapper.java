@@ -8,7 +8,7 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring")
 public interface TreatmentMapper {
 
-    @Mapping(target = "animalCode", source = "animal.animalCode")
-    @Mapping(target = "specialistCode", source = "specialist.professionalCode")
+    @Mapping(target = "animalId", source = "animal.id")
+    @Mapping(target = "specialistId", source = "specialist.id")
     TreatmentResponse toResponse(Treatment treatment);
 }
