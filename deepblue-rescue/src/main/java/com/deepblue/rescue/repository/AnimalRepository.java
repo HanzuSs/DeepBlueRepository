@@ -19,6 +19,8 @@ public interface AnimalRepository extends JpaRepository<Animal, Long> {
 
 	List<Animal> findByRescueCaseRescueCenterId(Long centerId);
 
+	List<Animal> findByRescueCaseRescueCenterCode(String centerCode);
+
 	@Query("""
 		select distinct a
 		from Animal a

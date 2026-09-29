@@ -17,6 +17,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -48,11 +49,22 @@ class AnimalServiceImplTest {
     }
 
     private Animal animalWithCaseStatus(RescueStatus status) {
-        RescueCase rescueCase = mock(RescueCase.class);
-        when(rescueCase.getStatus()).thenReturn(status);
+        RescueCase rescueCase = new RescueCase(
+                "CASE-001",
+                LocalDate.of(2026, 8, 20),
+                "Coastal rehabilitation centre",
+                status
+        );
 
-        Animal animal = mock(Animal.class);
-        when(animal.getRescueCase()).thenReturn(rescueCase);
+        Animal animal = new Animal(
+                "ANIMAL-001",
+                "Green Sea Turtle",
+                "Chelonia mydas",
+                AnimalSex.FEMALE
+        );
+
+        animal.setRescueCase(rescueCase);
+        rescueCase.assignAnimal(animal);
         return animal;
     }
 
