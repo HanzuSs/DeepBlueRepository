@@ -11,11 +11,13 @@ import java.util.Optional;
 
 public interface AnimalRepository extends JpaRepository<Animal, Long> {
 
-	Optional<Animal> findByAnimalCode(String animalCode);
+	Optional<Animal> findById(Long id);
 
 	List<Animal> findByCommonNameContainingIgnoreCase(String commonName);
 
 	List<Animal> findByRescueCaseStatus(RescueStatus status);
+
+	List<Animal> findByRescueCaseRescueCenterId(Long centerId);
 
 	List<Animal> findByRescueCaseRescueCenterCode(String centerCode);
 
