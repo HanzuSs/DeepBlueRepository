@@ -8,6 +8,8 @@ public record RescueCaseResponse(
 
         Long id,
 
+        String caseCode, 
+                
         Long caseId,
 
         LocalDate rescueDate,
