@@ -1,0 +1,10 @@
+services:
+  db:
+    image: postgres:18
+    container_name: deepblue-db
+    environment:
+      POSTGRES_DB: deepblue
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5433:5432"

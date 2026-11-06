@@ -44,6 +44,7 @@ class RescueCaseControllerTest {
     private RescueCaseResponse response(Long id, RescueStatus status) {
         return new RescueCaseResponse(
                 id,
+                "RES-001",
                 101L,
                 LocalDate.of(2026, 8, 20),
                 "Bahia Concha",

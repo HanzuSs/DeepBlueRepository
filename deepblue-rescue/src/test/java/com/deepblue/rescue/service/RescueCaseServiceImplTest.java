@@ -42,7 +42,7 @@ class RescueCaseServiceImplTest {
     private RescueCaseServiceImpl service;
 
     private RescueCaseResponse responseWith(RescueStatus status) {
-        return new RescueCaseResponse(1L, 101L, LocalDate.of(2026, 8, 20),
+        return new RescueCaseResponse(1L,"RES-001", 101L, LocalDate.of(2026, 8, 20),
                 "Santa Marta Bay", status, 201L, 301L);
     }
 
